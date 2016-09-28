@@ -226,7 +226,7 @@ class TempLog(tk.Frame):
             self.i = self.i + 1
 
             # rescale axes every fifth run
-            if self.i %5 == 1:
+            if self.i %10 == 1:
                 self.a.relim()
                 self.a.autoscale_view(scalex=False)
                 self.a.set_xlim(0, self.i + 20)
@@ -254,11 +254,12 @@ class TempLog(tk.Frame):
         self.logbtn.config(state='normal')
 
     def savelog(self):
-        # save measures TMPs to file, name = currentdate+currenttime.txt
-        cwd = os.getcwd()
-        logfinal = os.path.join(cwd,self.logname)
+        # save measured TMPs to file, name = currentdate+currenttime.txt
+        dir = tk.filedialog.askdirectory(initialdir = os.getcwd,title="Select directory for logfile!")
+        logfinal = os.path.join(dir,self.logname)
         np.savetxt(logfinal,self.log,delimiter='\t',newline='\n',header='TemperatureLog '+self.logname.replace('_TMPLog.txt','')+
                    '\n\nTime\tT1\tT2\tT3\n')
+
         
     def on_closing(self):
         # we should disconnect before we close the program
