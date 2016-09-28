@@ -254,10 +254,22 @@ class TempLog(tk.Frame):
         self.logbtn.config(state='normal')
 
     def savelog(self):
-        # save measured TMPs to file, name = currentdate+currenttime.txt
+        # reduces log-array and saves measured TMPs to file, name = currentdate+currenttime.txt
+        reducedlog=[]
+        for line in self.log:
+            c=0
+            for val in line:
+                if np.isnan(val)==True:
+                    c+=1
+                    if c==4:
+                        break
+            if c==4:
+                break
+            reducedlog.append(line)
+
         dir = tk.filedialog.askdirectory(initialdir = os.getcwd,title="Select directory for logfile!")
         logfinal = os.path.join(dir,self.logname)
-        np.savetxt(logfinal,self.log,delimiter='\t',newline='\n',header='TemperatureLog '+self.logname.replace('_TMPLog.txt','')+
+        np.savetxt(logfinal,reducedlog,delimiter='\t',newline='\n',header='TemperatureLog '+self.logname.replace('_TMPLog.txt','')+
                    '\n\nTime\tT1\tT2\tT3\n')
 
         
