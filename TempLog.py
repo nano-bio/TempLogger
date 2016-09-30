@@ -192,13 +192,17 @@ class TempLog(tk.Frame):
             frequency = float(self.frequency.get().replace(' Hz', ''))
             delay = 1 / frequency
             threading.Timer(delay, self.printvalue).start ()
-            
+
             # write the current time and value in the corresponding arrays
             # self.time = np.append(self.time, self.i)
             if self.i == 0:
                 self.time[self.i, 0] = 0
             else:
                 self.time[self.i,0] = self.time[self.i - 1, 0] + delay
+
+            # check if number of measurements is 100000, stop if true
+            if self.i == 100000:
+                self.stop()
                 
             #self.values = np.append(self.values, self.ardu.read_value())
             value = self.ardu.read_value()
@@ -225,7 +229,7 @@ class TempLog(tk.Frame):
 
             self.i = self.i + 1
 
-            # rescale axes every fifth run
+            # rescale axes every tenth run
             if self.i %10 == 1:
                 self.a.relim()
                 self.a.autoscale_view(scalex=False)
