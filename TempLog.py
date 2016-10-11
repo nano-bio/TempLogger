@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import messagebox
 
 import sys
 import glob
@@ -177,7 +178,11 @@ class TempLog(tk.Frame):
         # get the selected com port
         comoption = self.comport.get()
         # connect
-        self.ardu = Commu(comoption)
+        try:
+            self.ardu = Commu(comoption)
+        except RuntimeError as e:
+            messagebox.showerror("COM Port error", e)
+            return
         
         # adjust the GUI elements
         self.startb.config(state='normal')
@@ -198,7 +203,7 @@ class TempLog(tk.Frame):
             if self.i == 0:
                 self.time[self.i, 0] = 0
             else:
-                self.time[self.i,0] = self.time[self.i - 1, 0] + delay
+                self.time[self.i, 0] = self.time[self.i - 1, 0] + delay
 
             # check if number of measurements is 100000, stop if true
             if self.i == 100000:
@@ -206,26 +211,36 @@ class TempLog(tk.Frame):
                 
             #self.values = np.append(self.values, self.ardu.read_value())
             value = self.ardu.read_value()
+
             self.valuelabel1['text'] = str(value[0]) + " °C"
             self.valuelabel2['text'] = str(value[1]) + " °C"
             self.valuelabel3['text'] = str(value[2]) + " °C"
 
             # plot - note that we don't use plt.plot, because it is horribly slow
 
-            if 'N' not in value[0]:
+            if value[0] != 'N/A':
                 self.values[self.i, 0] = value[0]
-                self.line1.set_ydata(self.values[~np.isnan(self.values[:, 0]), 0])
-                self.line1.set_xdata(self.time[~np.isnan(self.time[:])])
+            else:
+                self.values[self.i, 0] = np.nan
 
-            if 'N' not in value[1]:
+            self.line1.set_ydata(self.values[~np.isnan(self.values[:, 0]), 0])
+            self.line1.set_xdata(self.time[~np.isnan(self.values[:, 0])])
+
+            if value[1] != 'N/A':
                 self.values[self.i, 1] = value[1]
-                self.line2.set_ydata(self.values[~np.isnan(self.values[:, 1]), 1])
-                self.line2.set_xdata(self.time[~np.isnan(self.time[:])])
+            else:
+                self.values[self.i, 1] = np.nan
+				
+            self.line2.set_ydata(self.values[~np.isnan(self.values[:, 1]), 1])
+            self.line2.set_xdata(self.time[~np.isnan(self.values[:, 1])])
 
-            if 'N' not in value[2]:
+            if value[2] != 'N/A':
                 self.values[self.i, 2] = value[2]
-                self.line3.set_ydata(self.values[~np.isnan(self.values[:, 2]), 2])
-                self.line3.set_xdata(self.time[~np.isnan(self.time[:])])
+            else:
+                self.values[self.i, 2] = np.nan
+
+            self.line3.set_ydata(self.values[~np.isnan(self.values[:, 2]), 2])
+            self.line3.set_xdata(self.time[~np.isnan(self.values[:, 2])])
 
             self.i = self.i + 1
 
@@ -236,7 +251,11 @@ class TempLog(tk.Frame):
                 self.a.set_xlim(0, self.i + 20)
 
             # draw the new line
-            self.canvas.draw()
+            try:
+                self.canvas.draw()
+            except RuntimeError as e:
+                print(self.values)
+                print(self.time)
 
     def start(self):
         # clear the plot before we start a new measurement
