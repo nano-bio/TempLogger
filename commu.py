@@ -43,7 +43,7 @@ class Commu():
                     val = ('N/A')
                 val2.append(val)
 
-            return val2[0:1]
+            return val2[0:3]
 
     def close(self):
         if self.connected:
