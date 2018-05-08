@@ -7,6 +7,7 @@ class Commu():
     def __init__(self, port = 'COM1'):
         self.port = port
         self.ser = serial.Serial(self.port, 9600, timeout=1)
+        time.sleep(2)
 
         # check whether we are actually connecting to an Arduino
         self.ser.write('*IDN?'.encode())
@@ -29,7 +30,7 @@ class Commu():
             value = self.ser.readline().decode("utf-8")
 
             values = value.split(',')
-            if len(values)<4:
+            if len(values)<1:
                 self.ser.write(b'*TMP?\n')
                 value = self.ser.readline().decode("utf-8")
                 values = value.split(',')
@@ -42,7 +43,7 @@ class Commu():
                     val = ('N/A')
                 val2.append(val)
 
-            return val2[0:3]
+            return val2[0:1]
 
     def close(self):
         if self.connected:
